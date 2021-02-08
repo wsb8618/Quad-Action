@@ -1012,7 +1012,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 3
+      scalar: 7
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -4914,7 +4914,7 @@ Transform:
   m_GameObject: {fileID: 4438065244935768511}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_Children:
   - {fileID: 7136567176507976373}
   - {fileID: 4202198019974732466}
@@ -4961,7 +4961,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 5
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4202198020540543399
 MonoBehaviour:
@@ -4976,4 +4976,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  value: 25
+  value: 500

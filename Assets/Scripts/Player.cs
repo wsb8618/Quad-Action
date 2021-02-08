@@ -11,10 +11,13 @@ public class Player : MonoBehaviour
     public int hasGrenade;
     public GameObject grenadeObj;
     public Camera followCamera;
+    public GameManager manager;
+    public AudioSource jumpSound;
 
     public int ammo;
     public int coin;
-    public int health;
+    public float health;
+    public int score;
 
     public int maxAmmo;
     public int maxCoin;
@@ -43,6 +46,8 @@ public class Player : MonoBehaviour
     bool isBorder;
     bool isDamage;
     bool isShop;
+    bool isDead;
+    bool isUpgrade;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
@@ -52,7 +57,7 @@ public class Player : MonoBehaviour
     MeshRenderer[] meshs;
 
     GameObject nearObject;
-    Weapon equipWeapon;
+    public Weapon equipWeapon;
     int equipWeaponIndex = -1;
     float fireDelay;
 
@@ -99,7 +104,7 @@ public class Player : MonoBehaviour
         if (isDodge)
             moveVec = dodgeVec;
 
-        if (isSwap || !isFireReady || isReload)
+        if (isSwap || !isFireReady || isReload || isDead)
             moveVec = Vector3.zero;
 
         if(!isBorder)
@@ -115,7 +120,7 @@ public class Player : MonoBehaviour
         transform.LookAt(transform.position + moveVec);
 
         //마우스에 의한 회전
-        if (fDown)
+        if (fDown && !isDead)
         {
             Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit rayHit;
@@ -130,12 +135,14 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if (jDown && moveVec == Vector3.zero && !isJump && !isDodge && !isSwap && !isShop)
+        if (jDown && moveVec == Vector3.zero && !isJump && !isDodge && !isSwap && !isShop && !isDead && !isReload && !isUpgrade)
         {
             rigid.AddForce(Vector3.up * 20, ForceMode.Impulse);
             anim.SetBool("isJump", true);
             anim.SetTrigger("doJump");
             isJump = true;
+
+            jumpSound.Play();
         }
     }
 
@@ -144,7 +151,7 @@ public class Player : MonoBehaviour
         if (hasGrenade == 0)
             return;
 
-        if(gDown && !isReload && !isSwap && !isShop)
+        if(gDown && !isReload && !isSwap && !isShop && !isDead && !isUpgrade)
         {
             Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit rayHit;
@@ -168,11 +175,13 @@ public class Player : MonoBehaviour
     {
         if (equipWeapon == null)
             return;
+        if (isReload)
+            return;
 
         fireDelay += Time.deltaTime;
         isFireReady = equipWeapon.rate < fireDelay;
 
-        if(fDown && isFireReady && !isDodge && !isSwap && !isShop)
+        if(fDown && isFireReady && !isDodge && !isSwap && !isShop && !isDead && !isUpgrade)
         {
             equipWeapon.Use();
             anim.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
@@ -191,7 +200,7 @@ public class Player : MonoBehaviour
         if (ammo == 0)
             return;
 
-        if(rDown && !isJump && !isDodge && !isSwap && isFireReady && !isShop)
+        if(rDown && !isJump && !isDodge && !isSwap && isFireReady && !isShop && !isReload && !isDead && !isUpgrade)
         {
             anim.SetTrigger("doReload");
             isReload = true;
@@ -203,14 +212,15 @@ public class Player : MonoBehaviour
     void ReloadOut()
     {
         int reAmmo = ammo < equipWeapon.maxAmmo ? ammo : equipWeapon.maxAmmo;
-        equipWeapon.curAmmo = reAmmo;
+        reAmmo -= equipWeapon.curAmmo;
+        equipWeapon.curAmmo += reAmmo;
         ammo -= reAmmo;
         isReload = false;
     }
 
     void Dodge()
     {
-        if (jDown && moveVec != Vector3.zero  && !isJump && !isDodge && !isSwap && !isShop)
+        if (jDown && moveVec != Vector3.zero  && !isJump && !isDodge && !isSwap && !isShop && !isDead && !isUpgrade)
         {
             dodgeVec = moveVec;
             speed *= 2;
@@ -241,7 +251,7 @@ public class Player : MonoBehaviour
         if (sDown2) weaponIndex = 1;
         if (sDown3) weaponIndex = 2;
 
-        if ((sDown1 || sDown2 || sDown3) && !isJump && !isDodge && !isShop)
+        if ((sDown1 || sDown2 || sDown3) && !isJump && !isDodge && !isShop && !isDead && !isUpgrade)
         {
             if (equipWeapon != null)
                 equipWeapon.gameObject.SetActive(false);
@@ -265,7 +275,7 @@ public class Player : MonoBehaviour
 
     void Interaction()
     {
-        if(iDown && nearObject != null && !isJump && !isDodge)
+        if(iDown && nearObject != null && !isJump && !isDodge && !isDead && !isShop && !isUpgrade)
         {
             if(nearObject.tag == "Weapon")
             {
@@ -280,6 +290,12 @@ public class Player : MonoBehaviour
                 Shop shop = nearObject.GetComponent<Shop>();
                 shop.Enter(this);
                 isShop = true;
+            }
+            else if (nearObject.tag == "Upgrade")
+            {
+                Upgrade upgrade = nearObject.GetComponent<Upgrade>();
+                upgrade.Enter(this);
+                isUpgrade = true;
             }
         }
     }
@@ -368,6 +384,9 @@ public class Player : MonoBehaviour
         if (isBossAtk)
             rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
 
+        if (health <= 0 && !isDead)
+            OnDie();
+
         yield return new WaitForSeconds(1f);
 
         isDamage = false;
@@ -380,9 +399,16 @@ public class Player : MonoBehaviour
             rigid.velocity = Vector3.zero;
     }
 
+    void OnDie()
+    {
+        anim.SetTrigger("doDie");
+        isDead = true;
+        manager.GameOver();
+    }
+
     void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Weapon" || other.tag == "Shop")
+        if (other.tag == "Weapon" || other.tag == "Shop" || other.tag == "Upgrade")
             nearObject = other.gameObject;
     }
 
@@ -395,6 +421,13 @@ public class Player : MonoBehaviour
             Shop shop = nearObject.GetComponent<Shop>();
             shop.Exit();
             isShop = false;
+            nearObject = null;
+        }
+        else if (other.tag == "Upgrade")
+        {
+            Upgrade upgrade = nearObject.GetComponent<Upgrade>();
+            upgrade.Exit();
+            isUpgrade = false;
             nearObject = null;
         }
     }

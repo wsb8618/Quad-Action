@@ -7,11 +7,16 @@ public class Enemy : MonoBehaviour
 {
     public enum Type { A, B, C, D };
     public Type enemyType;
-    public int maxHealth;
-    public int curHealth;
+    public float maxHealth;
+    public float curHealth;
+    public int score;
+
+    public GameManager manager;
     public Transform target;
     public BoxCollider meleeArea;
     public GameObject bullet;
+    public GameObject[] coins;
+
     public bool isChase;
     public bool isAttack;
     public bool isDead;
@@ -176,10 +181,13 @@ public class Enemy : MonoBehaviour
         {
             mesh.material.color = Color.red;
         }
-        yield return new WaitForSeconds(0.1f);
 
-        if(curHealth > 0)
+        //yield return new WaitForSeconds(0.1f);
+
+        if (curHealth > 0)
         {
+            yield return new WaitForSeconds(0.1f);
+
             foreach (MeshRenderer mesh in meshs)
             {
                 mesh.material.color = Color.white;
@@ -187,15 +195,66 @@ public class Enemy : MonoBehaviour
         }
         else
         {
+            isDead = true;
+            switch (enemyType)
+            {
+                case Type.A:
+                    manager.enemyCntA--;
+                    if (manager.enemyCntA < 0)
+                        manager.enemyCntA = 0;
+                    break;
+                case Type.B:
+                    manager.enemyCntB--;
+                    if (manager.enemyCntB < 0)
+                        manager.enemyCntB = 0;
+                    break;
+                case Type.C:
+                    manager.enemyCntC--;
+                    if (manager.enemyCntC < 0)
+                        manager.enemyCntC = 0;
+                    break;
+                case Type.D:
+                    manager.enemyCntD--;
+                    if (manager.enemyCntD < 0)
+                        manager.enemyCntD = 0;
+                    break;
+            }
+
             foreach (MeshRenderer mesh in meshs)
             {
                 mesh.material.color = Color.gray;
             }
             gameObject.layer = 14;
-            isDead = true;
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
+            Player player = target.GetComponent<Player>();
+            player.score += score;
+            int ranNum = Random.Range(0, 5);
+            int coinIndex = 0;
+            switch (ranNum)
+            {
+                case 0:
+                case 1:
+                    coinIndex = 0;
+                    break;
+                case 2:
+                case 3:
+                    coinIndex = 1;
+                    break;
+                case 4:
+                    coinIndex = 2;
+                    break;
+            }
+
+            if(enemyType != Type.D)
+                Instantiate(coins[coinIndex], transform.position, Quaternion.identity);
+            else
+            {
+                Instantiate(coins[coinIndex], transform.position, Quaternion.identity);
+                Instantiate(coins[coinIndex], transform.position + Vector3.right * 5, Quaternion.identity);
+                Instantiate(coins[coinIndex], transform.position + Vector3.left * 5, Quaternion.identity);
+            }
 
             if (isGrenade)
             {
@@ -214,8 +273,7 @@ public class Enemy : MonoBehaviour
                 rigid.AddForce(reactVec * 5, ForceMode.Impulse);
             }
 
-            if(enemyType != Type.D)
-                Destroy(gameObject, 4);
+            Destroy(gameObject, 4);
         }
     }
 }

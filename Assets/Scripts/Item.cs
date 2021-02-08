@@ -19,7 +19,7 @@ public class Item : MonoBehaviour
 
     void Update()
     {
-        transform.Rotate(Vector3.up * 20 * Time.deltaTime);
+        transform.Rotate(Vector3.up * 40 * Time.deltaTime);
     }
 
     void OnCollisionEnter(Collision collision)

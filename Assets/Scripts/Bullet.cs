@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public int damage;
+    public float damage;
     public bool isMelee;
     public bool isRock;
 
