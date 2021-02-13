@@ -268,6 +268,7 @@ MonoBehaviour:
   meshObj: {fileID: 5446721059629330636}
   effectObj: {fileID: 555374672587105980}
   rigid: {fileID: 1262414095266441053}
+  grenadeSound: {fileID: 8466835070409632841, guid: 5f9dc2546b3e180408d67098ffe2305a, type: 3}
 --- !u!1001 &1262414093854032637
 PrefabInstance:
   m_ObjectHideFlags: 0

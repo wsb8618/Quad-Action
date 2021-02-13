@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public RectTransform uiGroup;
+
     public GameObject menuCam;
     public GameObject gameCam;
     public Player player;
@@ -48,6 +50,9 @@ public class GameManager : MonoBehaviour
     public Text curScoreText;
     public Text bestText;
 
+    public AudioSource gameOverSound;
+    public AudioSource gameSound;
+
     float[] growHealth = { 100, 200, 300, 400, 500 };
     int index = -1;
     void Awake()
@@ -68,6 +73,8 @@ public class GameManager : MonoBehaviour
         gamePanel.SetActive(true);
 
         player.gameObject.SetActive(true);
+
+        gameSound.Play();
     }
 
     public void GameOver()
@@ -75,6 +82,9 @@ public class GameManager : MonoBehaviour
         gamePanel.SetActive(false);
         overPanel.SetActive(true);
         curScoreText.text = scoreTxt.text;
+
+        gameSound.Stop();
+        gameOverSound.Play();
 
         int maxScore = PlayerPrefs.GetInt("MaxScore");
         if(player.score > maxScore)
@@ -230,5 +240,20 @@ public class GameManager : MonoBehaviour
         {
             bossHealthGroup.anchoredPosition = Vector3.up * 200;
         }
+    }
+
+    public void GuideEnter()
+    {
+        uiGroup.anchoredPosition = Vector3.zero;
+    }
+
+    public void GuideExit()
+    {
+        uiGroup.anchoredPosition = Vector3.down * 1000;
+    }
+
+    public void GameExit()
+    {
+        Application.Quit();
     }
 }

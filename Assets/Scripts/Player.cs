@@ -13,6 +13,12 @@ public class Player : MonoBehaviour
     public Camera followCamera;
     public GameManager manager;
     public AudioSource jumpSound;
+    public AudioSource itemSound;
+    public AudioSource grenadeSound;
+    public AudioSource hammerSound;
+    public AudioSource handGunSound;
+    public AudioSource dodgeSound;
+    public AudioSource onHitSound;
 
     public int ammo;
     public int coin;
@@ -135,9 +141,9 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if (jDown && moveVec == Vector3.zero && !isJump && !isDodge && !isSwap && !isShop && !isDead && !isReload && !isUpgrade)
+        if (jDown && moveVec == Vector3.zero && !isJump && !isDodge && !isSwap && !isShop && !isDead && !isReload && !isUpgrade & isFireReady)
         {
-            rigid.AddForce(Vector3.up * 20, ForceMode.Impulse);
+            rigid.AddForce(Vector3.up * 11, ForceMode.Impulse);
             anim.SetBool("isJump", true);
             anim.SetTrigger("doJump");
             isJump = true;
@@ -168,7 +174,14 @@ public class Player : MonoBehaviour
                 hasGrenade--;
                 grenades[hasGrenade].SetActive(false);
             }
+
+            Invoke("GrenadeSound", 3f);
         }
+    }
+
+    void GrenadeSound()
+    {
+        grenadeSound.Play();
     }
 
     void Attack()
@@ -184,6 +197,10 @@ public class Player : MonoBehaviour
         if(fDown && isFireReady && !isDodge && !isSwap && !isShop && !isDead && !isUpgrade)
         {
             equipWeapon.Use();
+            if (equipWeapon.type == Weapon.Type.Melee)
+                hammerSound.Play();
+            else if (equipWeapon.type == Weapon.Type.Range && equipWeapon.curAmmo != 0)
+                handGunSound.Play();
             anim.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
             fireDelay = 0;
         }
@@ -210,9 +227,8 @@ public class Player : MonoBehaviour
     }
 
     void ReloadOut()
-    {
-        int reAmmo = ammo < equipWeapon.maxAmmo ? ammo : equipWeapon.maxAmmo;
-        reAmmo -= equipWeapon.curAmmo;
+    {   
+        int reAmmo = ammo + equipWeapon.curAmmo < equipWeapon.maxAmmo ? ammo : equipWeapon.maxAmmo - equipWeapon.curAmmo;
         equipWeapon.curAmmo += reAmmo;
         ammo -= reAmmo;
         isReload = false;
@@ -225,6 +241,7 @@ public class Player : MonoBehaviour
             dodgeVec = moveVec;
             speed *= 2;
             anim.SetTrigger("doDodge");
+            dodgeSound.Play();
             isDodge = true;
 
             Invoke("DodgeOut", 0.5f);
@@ -355,6 +372,7 @@ public class Player : MonoBehaviour
                     hasGrenade += item.value;
                     break;
             }
+            itemSound.Play();
             Destroy(other.gameObject);
         }
         else if (other.tag == "EnemyBullet")
@@ -376,6 +394,7 @@ public class Player : MonoBehaviour
     IEnumerator OnDamage(bool isBossAtk)
     {
         isDamage = true;
+        onHitSound.Play();
         foreach(MeshRenderer mesh in meshs)
         {
             mesh.material.color = Color.red;

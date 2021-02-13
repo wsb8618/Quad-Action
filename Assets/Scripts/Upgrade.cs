@@ -9,10 +9,17 @@ public class Upgrade : MonoBehaviour
     public int[] itemPrice;
     public string[] talkData;
     public Text talkText;
+    public Text upDamageText;
+    public int upDamageNum = 0;
 
     Player enterPlayer;
     Weapon enterWeapon;
     Bullet enterBullet;
+
+    public void Update()
+    {
+        upDamageText.text = "+" + upDamageNum;
+    }
 
     public void Enter(Player player)
     {
@@ -73,5 +80,6 @@ public class Upgrade : MonoBehaviour
         enterPlayer.coin -= price;
         enterBullet = bullet;
         enterBullet.damage += enterBullet.damage * 0.1f;
+        upDamageNum++;
     }
 }

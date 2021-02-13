@@ -27,6 +27,8 @@ public class Enemy : MonoBehaviour
     public NavMeshAgent nav;
     public Animator anim;
 
+    public AudioSource onDieSound;
+
     void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -177,12 +179,12 @@ public class Enemy : MonoBehaviour
 
     IEnumerator OnDamage(Vector3 reactVec, bool isGrenade)
     {
+        if (isDead) yield break;
+
         foreach (MeshRenderer mesh in meshs)
         {
             mesh.material.color = Color.red;
         }
-
-        //yield return new WaitForSeconds(0.1f);
 
         if (curHealth > 0)
         {
@@ -228,6 +230,7 @@ public class Enemy : MonoBehaviour
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
+            onDieSound.Play();
             Player player = target.GetComponent<Player>();
             player.score += score;
             int ranNum = Random.Range(0, 5);
