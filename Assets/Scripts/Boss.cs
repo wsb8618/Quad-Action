@@ -123,13 +123,13 @@ public class Boss : Enemy
         boxCollider.enabled = false;
         anim.SetTrigger("doTaunt");
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.75f);
         meleeArea.enabled = true;
         tauntSound.Play();
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.25f);
         meleeArea.enabled = false;
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         isLook = true;
         nav.isStopped = true;

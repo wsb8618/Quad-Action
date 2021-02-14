@@ -43,7 +43,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b5e9bdd3eb0f347408eb081db5a31112, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.4
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -285,8 +285,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyType: 1
-  maxHealth: 80
-  curHealth: 80
+  maxHealth: 70
+  curHealth: 70
   score: 250
   manager: {fileID: 0}
   target: {fileID: 0}

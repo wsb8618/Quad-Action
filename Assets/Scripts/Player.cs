@@ -222,7 +222,7 @@ public class Player : MonoBehaviour
             anim.SetTrigger("doReload");
             isReload = true;
 
-            Invoke("ReloadOut", 2f);
+            Invoke("ReloadOut", 1.5f);
         }
     }
 
@@ -401,7 +401,7 @@ public class Player : MonoBehaviour
         }
 
         if (isBossAtk)
-            rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
+            rigid.AddForce(transform.forward * -30, ForceMode.Impulse);
 
         if (health <= 0 && !isDead)
             OnDie();
